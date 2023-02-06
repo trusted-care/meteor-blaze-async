@@ -1,0 +1,14 @@
+<head>
+  <title>meteor-blaze-async</title>
+</head>
+
+<body>
+  <h1>Welcome to Meteor!</h1>
+
+  {{> hello}}
+</body>
+
+<template name="hello">
+    Async Task: {{asyncTask.text}} <br>
+    Concatenation: {{tasks_collection.one.text}}
+</template>
