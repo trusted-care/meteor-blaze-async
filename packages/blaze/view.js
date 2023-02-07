@@ -51,7 +51,10 @@ Blaze.View = function (name, render) {
     name = '';
   }
   this.name = name;
-  this._render = render;
+
+  this.promiseReactiveVar = new ReactiveVar()
+
+  this._render = render
 
   this._callbacks = {
     created: null,
@@ -343,9 +346,43 @@ Blaze._materializeView = function (view, parentView, _workStack, _intoArray) {
       // `view.autorun` sets the current view.
       view.renderCount++;
       view._isInRender = true;
+
+      /**
+       * - BEGINNING OF CHANGE -
+       *
+       * By setting the resolved value of a promise in htmljs to a reactive var (l. 339), the reactiveVar.get will
+       * be invalidated and the correct htmljs in the promise gets returned.
+       *
+       * Something similar could be done by changing logic of ReactiveVar: that a reactiveVar.get gets invalidated
+       * as soon as the promise, which has been reactiveVar.set, resolved. I had this before, but this approach is more
+       * handy.
+       *
+       * In fact, now we can work with async/await inside spacebars (search for new async/await in spacebars-runtime.js).
+       * It seems, that views can now handle promises, yet not in all cases:
+       * - <div class="{{Promise}}" /> as a returned attribute does not resolve as we work here with another autorun
+       *   logic not in view, but in ... - This is some strange Visitor Pattern logic where I couldn't go for this trick.
+       * - I also did this reactive var trick in expandView (l.454ff), but I don't know why it's needed exactly.
+       * - As this is an extra rerun, everything might become blinking and slower (???), I save rerender with ternary
+       *   operator, but app blicks as mustaches are first null/Promise pending.
+       */
+
+      const htmljs = view.promiseReactiveVar.get() ? view.promiseReactiveVar.get() : view._render()
+
+      if (htmljs instanceof Promise) {
+        htmljs.then(val => {
+          view.promiseReactiveVar.set(val)
+        })
+        return
+      }
+
       // Any dependencies that should invalidate this Computation come
       // from this line:
-      var htmljs = view._render();
+      //var htmljs = view._render();
+
+      /**
+       * - END OF CHANGE -
+       */
+
       view._isInRender = false;
 
       if (! c.firstRun && ! Blaze._isContentEqual(lastHtmljs, htmljs)) {
@@ -417,7 +454,29 @@ Blaze._expandView = function (view, parentView) {
 
   view._isInRender = true;
   var htmljs = Blaze._withCurrentView(view, function () {
-    return view._render();
+    /**
+     * - BEGINNING OF CHANGE -
+     */
+    const htmljs = view.promiseReactiveVar.get() ? view.promiseReactiveVar.get() : view._render()
+
+    if (htmljs instanceof Promise) {
+      htmljs.then(val => {
+        view.promiseReactiveVar.set(htmljs)
+      })
+      // view.__render = view._render
+      // view._render = () => view.promiseReactiveVar.get()
+      //
+      // return view
+      return
+    }
+
+    return htmljs
+
+    // return view._render();
+
+    /**
+     * - END OF CHANGE -
+     */
   });
   view._isInRender = false;
 

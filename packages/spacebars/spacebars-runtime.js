@@ -70,8 +70,8 @@ Spacebars.mustacheImpl = function (value/*, args*/) {
   return Spacebars.call.apply(null, args);
 };
 
-Spacebars.mustache = function (value/*, args*/) {
-  var result = Spacebars.mustacheImpl.apply(null, arguments);
+Spacebars.mustache = async function (value/*, args*/) {
+  var result = await Spacebars.mustacheImpl.apply(null, arguments);
 
   if (result instanceof Spacebars.SafeString)
     return HTML.Raw(result.toString());
@@ -124,7 +124,10 @@ Spacebars.makeRaw = function (value) {
 // that there are no args. We check for null before asserting because a user
 // may write a template like {{user.fullNameWithPrefix 'Mr.'}}, where the
 // function will be null until data is ready.
-Spacebars.call = function (value/*, args*/) {
+Spacebars.call = async function (value/*, args*/) {
+  if (value instanceof Promise) {
+    value = await value
+  }
   if (typeof value === 'function') {
     // Evaluate arguments by calling them if they are functions.
     var newArgs = [];
@@ -183,7 +186,7 @@ Spacebars.SafeString.prototype = Handlebars.SafeString.prototype;
 // * If `foo` is falsy now, return `foo`.
 //
 // * Return `foo.bar`, binding it to `foo` if it's a function.
-Spacebars.dot = function (value, id1/*, id2, ...*/) {
+Spacebars.dot = async function (value, id1/*, id2, ...*/) {
   if (arguments.length > 2) {
     // Note: doing this recursively is probably less efficient than
     // doing it in an iterative loop.
@@ -194,8 +197,16 @@ Spacebars.dot = function (value, id1/*, id2, ...*/) {
     return Spacebars.dot.apply(null, argsForRecurse);
   }
 
+  if (value instanceof Promise) {
+    value = await value
+  }
+
   if (typeof value === 'function')
     value = value();
+
+  if (value instanceof Promise) {
+    value = await value
+  }
 
   if (! value)
     return value; // falsy, don't index, pass through
