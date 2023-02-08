@@ -123,22 +123,28 @@ var materializeTag = function (tag, parentView, workStack) {
 
   if (rawAttrs) {
     var attrUpdater = new ElementAttributesUpdater(elem);
-    var updateAttributes = function () {
-      var expandedAttrs = Blaze._expandAttributes(rawAttrs, parentView);
-      var flattenedAttrs = HTML.flattenAttributes(expandedAttrs);
-      var stringAttrs = {};
-      for (var attrName in flattenedAttrs) {
-        // map `null`, `undefined`, and `false` to null, which is important
-        // so that attributes with nully values are considered absent.
-        // stringify anything else (e.g. strings, booleans, numbers including 0).
-        if (flattenedAttrs[attrName] == null || flattenedAttrs[attrName] === false)
-          stringAttrs[attrName] = null;
-        else
-          stringAttrs[attrName] = Blaze._toText(flattenedAttrs[attrName],
-                                                parentView,
-                                                HTML.TEXTMODE.STRING);
-      }
-      attrUpdater.update(stringAttrs);
+    var updateAttributes = async function (c) {
+      await Tracker.withComputation(c, async () => {
+        var expandedAttrs = Blaze._expandAttributes(rawAttrs, parentView);
+        var flattenedAttrs = HTML.flattenAttributes(expandedAttrs);
+        var stringAttrs = {};
+        for (var attrName in flattenedAttrs) {
+          // map `null`, `undefined`, and `false` to null, which is important
+          // so that attributes with nully values are considered absent.
+          // stringify anything else (e.g. strings, booleans, numbers including 0).
+          if (flattenedAttrs[attrName] == null || flattenedAttrs[attrName] === false)
+            stringAttrs[attrName] = null;
+          else {
+            if (flattenedAttrs[attrName] instanceof Promise) {
+              flattenedAttrs[attrName] = await flattenedAttrs[attrName]
+            }
+            stringAttrs[attrName] = Blaze._toText(flattenedAttrs[attrName],
+                parentView,
+                HTML.TEXTMODE.STRING);
+          }
+        }
+        attrUpdater.update(stringAttrs);
+      });
     };
     var updaterComputation;
     if (parentView) {
