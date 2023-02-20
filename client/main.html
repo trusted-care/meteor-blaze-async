@@ -1,14 +1,31 @@
 <head>
-  <title>meteor-blaze-async</title>
+    <title>meteor-blaze-async</title>
+
 </head>
 
 <body>
-  <h1>Welcome to Meteor!</h1>
+    <div style="float: right; padding: 20px 25px; border-radius: 10px; background-color: lightblue">
+        <strong>ToDo:</strong>
+        <pre style="padding: 5px 10px;">
+[X] Make sure that current Trusted Care App still works
+[ ] Check chained promise chains (?) if that makes sense (it probably does)
+  [ ] Check returning an ASYNC function that returns a random id next
+[ ] What is with the tests? Run Tests before & after
+        </pre>
+    </div>
 
-  {{> hello}}
+    <h1>Welcome to Meteor!</h1>
+
+    {{> main}}
 </body>
 
-<template name="hello">
-    Async Task: {{asyncTask.text}} <br>
-    Concatenation: {{tasks_collection.one.text}}
+<template name="main">
+    Constant: {{illuminatiSecret}} <br>
+    Helper with Value: {{ secretOfLife }} <br>
+    Helper returns Promise with Value Result: {{ asyncValue }} <br>
+    Helper returns Promise with Object containing value Result: {{asyncTask.text}} <br>
+    Function after Promise: {{functionAfterPromise.coolFunc}} <br>
+    Function after Promise returning another promised value: {{functionAfterPromiseReturningAnotherPromisedValue.coolFunc}} <br>
+    Function after Promise returning another promised value returning another function returning a promised value: {{functionAfterPromiseReturningAnotherPromisedValueReturningAnotherFunctionReturningAnotherPromiseValue.coolFunc.evenCoolerFunc}} <br>
+    Attribute: <br>
 </template>
