@@ -4,22 +4,37 @@
 </head>
 
 <body>
-    <div style="float: right; padding: 20px 25px; border-radius: 10px; background-color: lightblue">
+    <div style="float: right; max-width: 50%; overflow: auto; padding: 20px 25px; border-radius: 10px; background-color: lightblue">
         <strong>ToDo:</strong>
         <pre style="padding: 5px 10px;">
-[X] Make sure that current Trusted Care App still works
+
+➡️ [ ] Update / promisify Spacebars.dot
+
+[ ] Make / keep / track & apply / keep the `this` context for
+    functions correct - whatever that may be? 😅
+[ ] Update / promisify Spacebars.apply
+[ ] Update / Fix Spacebars.mustache to apply its bag of tricks to the promise(d) result too before returning it's own promise.
+
+[ ] Make sure that current Trusted Care App still works
+[ ] Make sure that
 [ ] Check chained promise chains (?) if that makes sense (it probably does)
   [ ] Check returning an ASYNC function that returns a random id next
+[ ] Check _render - callback - hack - we don't really run the same code, we're missing the Spacebars.mustache part?
 [ ] What is with the tests? Run Tests before & after
+[ ] Attributes
+[ ] HCP / Hot Modules Thing?
         </pre>
     </div>
 
     <h1>Welcome to Meteor!</h1>
+    <p>🌹 I never <em>promised</em> you a rosegarden... 🌹</p>
 
     {{> main}}
 </body>
 
 <template name="main">
+    <p><strong>Works:</strong></p>
+
     Constant: {{illuminatiSecret}} <br>
     Helper with Value: {{ secretOfLife }} <br>
     Helper returns Promise with Value Result: {{ asyncValue }} <br>
@@ -27,5 +42,23 @@
     Function after Promise: {{functionAfterPromise.coolFunc}} <br>
     Function after Promise returning another promised value: {{functionAfterPromiseReturningAnotherPromisedValue.coolFunc}} <br>
     Function after Promise returning another promised value returning another function returning a promised value: {{functionAfterPromiseReturningAnotherPromisedValueReturningAnotherFunctionReturningAnotherPromiseValue.coolFunc.evenCoolerFunc}} <br>
-    Attribute: <br>
+
+
+    {{!--
+    --}}
+    <p><strong>Doesn't:</strong></p>
+
+    Attributes: Dynamically update Attributes of this thing:
+
+    <thing {{wildAttributes}}>Wild Thing</thing>
+
+    {{!--
+    --}}
+
+    <p><strong>Don't know:</strong></p>
+
+    <p><strong>Oh f...:</strong></p>
+
+    Complex queries using operators and such? <h1 style="display: inline"> 🤣</h1>
+
 </template>
